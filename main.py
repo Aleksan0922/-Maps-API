@@ -173,7 +173,7 @@ while running:
                     screen.blit(pygame.image.load(map_file), (0, 0))
                     pygame.display.flip()
             if event.key == pygame.K_2:
-                type = 'map'
+                type = 'sat'
                 new_params = {
                     'll': ','.join([str(height), str(width)]),
                     'z': params['z'],
