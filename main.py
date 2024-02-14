@@ -64,7 +64,6 @@ def get_ll_and_coords(adress):
     json_response = response.json()
     toponym = json_response["response"]["GeoObjectCollection"][
         "featureMember"][0]["GeoObject"]
-    print(toponym)
     full_adress = toponym['metaDataProperty']['GeocoderMetaData']['Address']['formatted']
     postal_code = toponym['metaDataProperty']['GeocoderMetaData']['Address']['postal_code']
     toponym_coodrinates = toponym["Point"]['pos']
