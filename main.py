@@ -64,10 +64,12 @@ def get_ll_and_coords(adress):
     json_response = response.json()
     toponym = json_response["response"]["GeoObjectCollection"][
         "featureMember"][0]["GeoObject"]
+    print(toponym)
     full_adress = toponym['metaDataProperty']['GeocoderMetaData']['Address']['formatted']
+    postal_code = toponym['metaDataProperty']['GeocoderMetaData']['Address']['postal_code']
     toponym_coodrinates = toponym["Point"]['pos']
     toponym_longitude, toponym_lattitude = toponym_coodrinates.split(" ")
-    return (toponym_longitude, toponym_lattitude), full_adress
+    return (toponym_longitude, toponym_lattitude), full_adress, postal_code
 
 
 # Инициализируем pygame
@@ -80,8 +82,9 @@ font = pygame.font.Font(None, 32)
 clock = pygame.time.Clock()
 
 input_box = pygame.Rect(10, 10, 500, 32)
-button_box = pygame.Rect(520, 10, 80, 32)
-adress_box = pygame.Rect(10, 510, 580, 32)
+button_box = pygame.Rect(520, 10, 75, 32)
+adress_box = pygame.Rect(10, 510, 550, 32)
+postal_box = pygame.Rect(570, 510, 25, 32)
 
 color_inactive = pygame.Color('lightskyblue3')
 color_active = pygame.Color('dodgerblue2')
@@ -90,6 +93,8 @@ active = False
 text = ''
 
 adress = ''
+
+add_postal = False
 
 pygame.display.flip()
 running = True
@@ -110,15 +115,26 @@ while running:
                     'l': type
                 }
                 adress = ''
+                postal_code = ''
 
                 update()
+            if postal_box.collidepoint(event.pos):
+                add_postal = not add_postal
+                if add_postal:
+                    if adress:
+                        adress = adress + ': ' + postal_code
+                else:
+                    if ':' in adress:
+                        adress = adress[:adress.rfind(':')]
             color = color_active if active else color_inactive
         if event.type == pygame.KEYDOWN:
             if active:
                 if event.key == pygame.K_RETURN:
-                    toponym_coodrinates, adress = get_ll_and_coords(text)
+                    toponym_coodrinates, adress, postal_code = get_ll_and_coords(text)
 
                     width, height = float(toponym_coodrinates[1]), float(toponym_coodrinates[0])
+                    if add_postal:
+                        adress = adress + ': ' + postal_code
                     z = 5
 
                     new_params = {
@@ -250,15 +266,24 @@ while running:
     txt_surface = font.render(text, True, color)
     button_surface = font.render('Сброс', True, 'red')
     adress_surface = font.render(adress, True, 'green')
+    if not add_postal:
+        postal_surface = font.render('X', True, 'red')
+    else:
+        postal_surface = font.render('', True, 'green')
 
     screen.blit(pygame.image.load(map_file), (0, 50))
     screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
     screen.blit(button_surface, (button_box.x + 5, button_box.y + 5))
     screen.blit(adress_surface, (adress_box.x + 5, adress_box.y + 5))
+    screen.blit(postal_surface, (postal_box.x + 5, postal_box.y + 5))
 
     pygame.draw.rect(screen, color, input_box, 2)
     pygame.draw.rect(screen, 'red', button_box, 2)
     pygame.draw.rect(screen, 'green', adress_box, 2)
+    if add_postal:
+        pygame.draw.rect(screen, 'green', postal_box, 2)
+    else:
+        pygame.draw.rect(screen, 'red', postal_box, 2)
 
     pygame.display.flip()
 
