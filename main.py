@@ -77,7 +77,8 @@ screen.blit(pygame.image.load(map_file), (0, 100))
 # Переключаем экран и ждем закрытия окна.
 font = pygame.font.Font(None, 32)
 clock = pygame.time.Clock()
-input_box = pygame.Rect(10, 10, 590, 32)
+input_box = pygame.Rect(10, 10, 500, 32)
+button_box = pygame.Rect(520, 10, 80, 32)
 color_inactive = pygame.Color('lightskyblue3')
 color_active = pygame.Color('dodgerblue2')
 color = color_inactive
@@ -94,6 +95,15 @@ while running:
                 active = not active
             else:
                 active = False
+            if button_box.collidepoint(event.pos):
+                new_params = {
+                    'll': ','.join([str(height), str(width)]),
+                    'pt': '',
+                    'z': params['z'],
+                    'l': type
+                }
+
+                update()
             color = color_active if active else color_inactive
         if event.type == pygame.KEYDOWN:
             if active:
@@ -130,7 +140,8 @@ while running:
                     else:
                         new_params['pt'] = ','.join([str(height), str(width)])
 
-                    print(new_params)
+                    active = False
+                    color = color_inactive
                     update()
                     text = ''
                 elif event.key == pygame.K_BACKSPACE:
@@ -228,9 +239,12 @@ while running:
                 update()
     screen.fill(pygame.Color('black'))
     txt_surface = font.render(text, True, color)
+    button_surface = font.render('Сброс', True, 'red')
     screen.blit(pygame.image.load(map_file), (0, 50))
     screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
+    screen.blit(button_surface, (button_box.x + 5, button_box.y + 5))
     pygame.draw.rect(screen, color, input_box, 2)
+    pygame.draw.rect(screen, 'red', button_box, 2)
     pygame.display.flip()
     clock.tick(30)
 pygame.quit()
